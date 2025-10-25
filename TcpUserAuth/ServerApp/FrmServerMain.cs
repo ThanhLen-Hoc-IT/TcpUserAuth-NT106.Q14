@@ -70,5 +70,10 @@ namespace ServerApp
         {
 
         }
+
+        private void FrmServerMain_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
