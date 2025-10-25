@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -166,11 +167,29 @@ namespace ServerApp
             return new ResponseMessage { Success = true, User = got.user, Message = "OK" };
         }
 
+        public static bool CheckLogin(string username, string password)
+        {
+            string connectionString = "Data Source=.;Initial Catalog=LoginDB;Integrated Security=True";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = "SELECT COUNT(*) FROM Users WHERE Username=@user AND Password=@pass";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@user", username);
+                cmd.Parameters.AddWithValue("@pass", password);
+
+                int count = (int)cmd.ExecuteScalar();
+                return count > 0;
+            }
+        }
+
         private static ResponseMessage DoLogout(RequestMessage req)
         {
             TokenManager.Revoke(req.Token);
             return new ResponseMessage { Success = true, Message = "Đã đăng xuất." };
         }
+
 
         public void Disconnect()
         {
