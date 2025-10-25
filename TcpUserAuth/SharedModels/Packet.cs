@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharedModels
+﻿namespace SharedModels
 {
-    internal class Packet
+    public class Packet
     {
+        public string Command { get; set; }   
+        public string Data { get; set; }     
+        public string Token { get; set; }     
     }
 }

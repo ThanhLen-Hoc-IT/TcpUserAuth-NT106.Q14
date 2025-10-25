@@ -16,5 +16,10 @@ namespace ServerApp
         {
             InitializeComponent();
         }
+
+        private void FrmServerMain_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
