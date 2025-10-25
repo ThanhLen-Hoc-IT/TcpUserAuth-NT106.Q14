@@ -14,7 +14,7 @@ namespace ServerApp
         private readonly Server _server;
         private readonly FrmServerMain _ui;
 
-        ClientHandler(string id, TcpClient client, Server server, FrmServerMain ui)
+        public ClientHandler(string id, TcpClient client, Server server, FrmServerMain ui)
         {
             _id = id;
             _client = client;

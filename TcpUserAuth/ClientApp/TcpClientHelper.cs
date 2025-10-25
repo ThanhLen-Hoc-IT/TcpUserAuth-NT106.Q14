@@ -46,12 +46,12 @@ namespace ClientApp
 
             try
             {
-                // 1️⃣ Gửi request dạng JSON
+                // Gửi request dạng JSON
                 var json = Utilities.ToJson(request) + "\n";
                 var data = Encoding.UTF8.GetBytes(json);
                 await _stream.WriteAsync(data, 0, data.Length);
 
-                // 2️⃣ Nhận phản hồi
+                // Nhận phản hồi
                 var buffer = new byte[4096];
                 var sb = new StringBuilder();
 

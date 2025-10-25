@@ -9,7 +9,7 @@ using SharedModels;
 
 namespace ServerApp
 {
-    internal class Server
+    public class Server
     {
         private TcpListener listener;
         private CancellationTokenSource cts;
@@ -73,14 +73,19 @@ namespace ServerApp
             {
                 while (!token.IsCancellationRequested)
                 {
+                    // ✅ Lắng nghe client mới
                     var tcpClient = await listener.AcceptTcpClientAsync();
                     string clientId = Guid.NewGuid().ToString();
                     ui.AddLog($"📥 Client connected: {clientId}");
 
+                    // ✅ Tạo handler riêng cho client
                     var handler = new ClientHandler(clientId, tcpClient, this, ui);
                     clients[clientId] = handler;
 
+                    // ✅ Xử lý client trong thread riêng
                     _ = Task.Run(() => handler.ProcessAsync(token));
+
+                    // ✅ Cập nhật danh sách client trong UI
                     ui.UpdateClientList(clients.Keys);
                 }
             }
@@ -93,6 +98,7 @@ namespace ServerApp
                 ui.AddLog($"❌ Accept error: {ex.Message}");
             }
         }
+
 
         public void RemoveClient(string clientId)
         {
