@@ -181,6 +181,7 @@ using System.Windows.Forms;
 // Nếu FrmRegister có namespace khác, ví dụ ClientApp.Forms,
 // thì sửa dòng này tương ứng.
 using ClientApp;
+using SharedModels;
 
 namespace ClientApp
 {

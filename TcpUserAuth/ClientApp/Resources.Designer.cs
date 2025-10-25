@@ -10,8 +10,9 @@
 
 namespace ClientApp {
     using System;
-    
-    
+    using SharedModels;
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>

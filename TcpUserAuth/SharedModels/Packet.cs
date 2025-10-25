@@ -1,12 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharedModels
 {
-    internal class Packet
+    [Serializable]
+    public class Packet
     {
+        public string Command { get; set; }   // loại lệnh
+        public object Data { get; set; }      // dữ liệu gửi kèm
+        public string Token { get; set; }     // mã xác thực
+
+        public Packet() { }
+
+        public Packet(string command, object data, string token = null)
+        {
+            Command = command;
+            Data = data;
+            Token = token;
+        }
     }
 }

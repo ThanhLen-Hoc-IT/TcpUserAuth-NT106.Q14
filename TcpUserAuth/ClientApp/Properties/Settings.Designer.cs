@@ -7,6 +7,7 @@
 //     the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
+using SharedModels;
 
 namespace ClientApp.Properties
 {

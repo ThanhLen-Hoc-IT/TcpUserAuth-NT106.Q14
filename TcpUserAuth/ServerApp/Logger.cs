@@ -1,12 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿//using System;
+//using System.IO;
+
+//namespace ServerApp
+//{
+//    internal class Logger
+//    {
+//        private static readonly object _lock = new object();
+//        private static readonly string _logFile = "server_log.txt";
+
+//        public static void Info(string message)
+//        {
+//            Write("INFO", message);
+//        }
+
+//        public static void Error(string message)
+//        {
+//            Write("ERROR", message);
+//        }
+
+//        public static void Warning(string message)
+//        {
+//            Write("WARN", message);
+//        }
+
+//        private static void Write(string level, string message)
+//        {
+//            string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{level}] {message}";
+//            Console.WriteLine(line); // hiển thị trên console nếu có
+
+//            lock (_lock)
+//            {
+//                File.AppendAllText(_logFile, line + Environment.NewLine);
+//            }
+//        }
+//    }
+//}
+
+
+using System;
+using System.IO;
 
 namespace ServerApp
 {
-    internal class Logger
+    public static class Logger
     {
+        private static readonly string logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "server.log");
+
+        public static void Error(string message)
+        {
+            try
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now:HH:mm:ss} [ERROR] {message}\n");
+            }
+            catch { }
+        }
+
+        public static void Info(string message)
+        {
+            try
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now:HH:mm:ss} [INFO] {message}\n");
+            }
+            catch { }
+        }
     }
 }
