@@ -38,7 +38,7 @@
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(67, 40);
+            this.btnStart.Location = new System.Drawing.Point(230, 390);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(111, 40);
             this.btnStart.TabIndex = 0;
@@ -48,7 +48,7 @@
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(232, 48);
+            this.btnStop.Location = new System.Drawing.Point(396, 394);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(104, 32);
             this.btnStop.TabIndex = 1;
@@ -58,21 +58,22 @@
             // 
             // txtLog
             // 
-            this.txtLog.Location = new System.Drawing.Point(84, 110);
+            this.txtLog.Location = new System.Drawing.Point(38, 47);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
             this.txtLog.ReadOnly = true;
             this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(110, 29);
+            this.txtLog.Size = new System.Drawing.Size(167, 317);
             this.txtLog.TabIndex = 2;
+            this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
             // 
             // lvClients
             // 
             this.lvClients.FullRowSelect = true;
             this.lvClients.HideSelection = false;
-            this.lvClients.Location = new System.Drawing.Point(84, 180);
+            this.lvClients.Location = new System.Drawing.Point(232, 99);
             this.lvClients.Name = "lvClients";
-            this.lvClients.Size = new System.Drawing.Size(329, 175);
+            this.lvClients.Size = new System.Drawing.Size(268, 265);
             this.lvClients.TabIndex = 3;
             this.lvClients.UseCompatibleStateImageBehavior = false;
             this.lvClients.View = System.Windows.Forms.View.List;
@@ -80,7 +81,7 @@
             // lblClients
             // 
             this.lblClients.AutoSize = true;
-            this.lblClients.Location = new System.Drawing.Point(276, 406);
+            this.lblClients.Location = new System.Drawing.Point(417, 63);
             this.lblClients.Name = "lblClients";
             this.lblClients.Size = new System.Drawing.Size(60, 16);
             this.lblClients.TabIndex = 5;
@@ -89,7 +90,7 @@
             // lblStatus
             // 
             this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(93, 403);
+            this.lblStatus.Location = new System.Drawing.Point(241, 63);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(100, 16);
             this.lblStatus.TabIndex = 6;

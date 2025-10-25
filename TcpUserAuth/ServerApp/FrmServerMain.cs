@@ -65,5 +65,10 @@ namespace ServerApp
                 lblClients.Text = $"Clients: {lvClients.Items.Count}";
             }
         }
+
+        private void txtLog_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
