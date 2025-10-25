@@ -1,0 +1,6 @@
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\bin\Debug\SharedModels.dll
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\bin\Debug\SharedModels.pdb
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\obj\Debug\SharedModels.csproj.AssemblyReference.cache
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\obj\Debug\SharedModels.csproj.CoreCompileInputs.cache
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\obj\Debug\SharedModels.dll
+D:\HK1-N2\NT106\EX3\TcpUserAuth\SharedModels\obj\Debug\SharedModels.pdb
