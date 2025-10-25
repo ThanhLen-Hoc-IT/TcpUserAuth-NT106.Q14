@@ -14,7 +14,7 @@ namespace ServerApp
         private readonly Server _server;
         private readonly FrmServerMain _ui;
 
-        public ClientHandler(string id, TcpClient client, Server server, FrmServerMain ui)
+        ClientHandler(string id, TcpClient client, Server server, FrmServerMain ui)
         {
             _id = id;
             _client = client;
@@ -24,56 +24,59 @@ namespace ServerApp
 
         public async Task ProcessAsync(CancellationToken token)
         {
-            using var c = _client;
-            using var stream = c.GetStream();
-            var buffer = new byte[4096];
-            var sb = new StringBuilder();
-
-            try
+            using (var c = _client)
+            using (var stream = c.GetStream())
             {
-                while (!token.IsCancellationRequested)
+                var buffer = new byte[4096];
+                var sb = new StringBuilder();
+
+                try
                 {
-                    int n = await stream.ReadAsync(buffer, 0, buffer.Length, token);
-                    if (n == 0) break;
-
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, n));
-
-                    if (!sb.ToString().Contains("\n"))
-                        continue;
-
-                    var line = sb.ToString();
-                    var idx = line.IndexOf('\n');
-                    var one = line.Substring(0, idx);
-                    sb.Clear();
-
-                    if (idx + 1 < line.Length)
-                        sb.Append(line.Substring(idx + 1));
-
-                    var req = Utilities.FromJson<RequestMessage>(one);
-                    if (req == null)
+                    while (!token.IsCancellationRequested)
                     {
-                        await SendAsync(stream, new ResponseMessage
-                        {
-                            Success = false,
-                            Message = "Yêu cầu không hợp lệ."
-                        });
-                        continue;
-                    }
+                        int n = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+                        if (n == 0) break;
 
-                    var resp = Handle(req);
-                    await SendAsync(stream, resp);
+                        sb.Append(Encoding.UTF8.GetString(buffer, 0, n));
+
+                        if (!sb.ToString().Contains("\n"))
+                            continue;
+
+                        var line = sb.ToString();
+                        var idx = line.IndexOf('\n');
+                        var one = line.Substring(0, idx);
+                        sb.Clear();
+
+                        if (idx + 1 < line.Length)
+                            sb.Append(line.Substring(idx + 1));
+
+                        var req = Utilities.FromJson<RequestMessage>(one);
+                        if (req == null)
+                        {
+                            await SendAsync(stream, new ResponseMessage
+                            {
+                                Success = false,
+                                Message = "Yêu cầu không hợp lệ."
+                            });
+                            continue;
+                        }
+
+                        var resp = Handle(req);
+                        await SendAsync(stream, resp);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _ui.AddLog($"⚠️ Client {_id} error: {ex.Message}");
+                }
+                finally
+                {
+                    _server.RemoveClient(_id);
+                    Disconnect();
                 }
             }
-            catch (Exception ex)
-            {
-                _ui.AddLog($"⚠️ Client {_id} error: {ex.Message}");
-            }
-            finally
-            {
-                _server.RemoveClient(_id);
-                Disconnect();
-            }
         }
+
 
         private static Task SendAsync(NetworkStream stream, ResponseMessage resp)
         {
@@ -84,15 +87,25 @@ namespace ServerApp
 
         private static ResponseMessage Handle(RequestMessage req)
         {
-            return req.Action switch
+            switch (req.Action)
             {
-                "Register" => DoRegister(req),
-                "Login" => DoLogin(req),
-                "GetProfile" => DoGetProfile(req),
-                "Logout" => DoLogout(req),
-                _ => new ResponseMessage { Success = false, Message = "Action không được hỗ trợ." }
-            };
+                case "Register":
+                    return DoRegister(req);
+                case "Login":
+                    return DoLogin(req);
+                case "GetProfile":
+                    return DoGetProfile(req);
+                case "Logout":
+                    return DoLogout(req);
+                default:
+                    return new ResponseMessage
+                    {
+                        Success = false,
+                        Message = "Action không được hỗ trợ."
+                    };
+            }
         }
+
 
         private static ResponseMessage DoRegister(RequestMessage req)
         {
