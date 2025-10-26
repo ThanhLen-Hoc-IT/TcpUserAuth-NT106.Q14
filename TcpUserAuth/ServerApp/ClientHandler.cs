@@ -67,7 +67,7 @@ namespace ServerApp
                         }
 
 
-                        // Xử lý hành động và gửi phản hồi
+                      
                         var resp = Handle(req);
                         await SendAsync(stream, resp);
                     }
@@ -92,7 +92,8 @@ namespace ServerApp
             return stream.WriteAsync(data, 0, data.Length);
         }
 
-        // Xử lý các loại request
+        
+        //xử lý các loại request
         private static ResponseMessage Handle(RequestMessage req)
         {
             switch (req.Action)

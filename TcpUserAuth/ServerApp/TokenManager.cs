@@ -76,7 +76,9 @@ namespace ServerApp
             return Tokens.TryGetValue(token, out username);
         }
 
-        // Thu hồi (xóa) token
+        
+
+        //thu hồi token
         public static void Revoke(string token)
         {
             Tokens.TryRemove(token, out _);

@@ -16,10 +16,11 @@ namespace ClientApp
         public static string Sha256(string input)
         {
             using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input)); // Băm chuỗi thành mảng byte
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input)); //Băm chuỗi thành mảng byte
             var sb = new StringBuilder();
-            foreach (var b in bytes) sb.Append(b.ToString("x2")); // Chuyển byte sang dạng hex
-            return sb.ToString();
+            foreach (var b in bytes) sb.Append(b.ToString("x2")); //Chuyển byte sang dạng hex
+
+            return sb.ToString(); // Trả về chuỗi hash hoàn chỉnh
         }
     }
 
