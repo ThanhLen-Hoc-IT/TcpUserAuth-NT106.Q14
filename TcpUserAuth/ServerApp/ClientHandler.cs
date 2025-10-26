@@ -22,7 +22,7 @@ namespace ServerApp
             _ui = ui;
         }
 
-        // ✅ Hàm xử lý mỗi client
+        // Hàm xử lý mỗi client
         public async Task ProcessAsync(CancellationToken token)
         {
             using (var c = _client)
@@ -52,12 +52,12 @@ namespace ServerApp
                             sb.Append(line.Substring(idx + 1));
 
                         // Log để xem server có nhận gì không
-                        _ui.AddLog($"📩 Nhận dữ liệu thô từ client: {one}");
+                        _ui.AddLog($"Nhận dữ liệu thô từ client: {one}");
 
                         var req = Utilities.FromJson<RequestMessage>(one);
                         if (req == null)
                         {
-                            _ui.AddLog("⚠️ Lỗi: không parse được JSON từ client!");
+                            _ui.AddLog("Lỗi: không parse được JSON từ client!");
                             await SendAsync(stream, new ResponseMessage
                             {
                                 Success = false,
@@ -67,14 +67,14 @@ namespace ServerApp
                         }
 
 
-                        // ✅ Xử lý hành động và gửi phản hồi
+                        // Xử lý hành động và gửi phản hồi
                         var resp = Handle(req);
                         await SendAsync(stream, resp);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _ui.AddLog($"⚠️ Client {_id} error: {ex}");
+                    _ui.AddLog($"Client {_id} error: {ex}");
                 }
                 finally
                 {
@@ -84,7 +84,7 @@ namespace ServerApp
             }
         }
 
-        // ✅ Gửi dữ liệu JSON về client
+        // Gửi dữ liệu JSON về client
         private static Task SendAsync(NetworkStream stream, ResponseMessage resp)
         {
             var json = Utilities.ToJson(resp);
@@ -92,7 +92,7 @@ namespace ServerApp
             return stream.WriteAsync(data, 0, data.Length);
         }
 
-        // ✅ Xử lý các loại request
+        // Xử lý các loại request
         private static ResponseMessage Handle(RequestMessage req)
         {
             switch (req.Action)
@@ -114,7 +114,7 @@ namespace ServerApp
             }
         }
 
-        // ✅ Xử lý đăng ký
+        // Xử lý đăng ký
         private static ResponseMessage DoRegister(RequestMessage req)
         {
             if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.PasswordHash))
@@ -135,7 +135,7 @@ namespace ServerApp
             }
         }
 
-        // ✅ Xử lý đăng nhập
+        // Xử lý đăng nhập
         private static ResponseMessage DoLogin(RequestMessage req)
         {
             try
@@ -163,7 +163,7 @@ namespace ServerApp
             }
         }
 
-        // ✅ Lấy thông tin user
+        // Lấy thông tin user
         private static ResponseMessage DoGetProfile(RequestMessage req)
         {
             if (!TokenManager.Validate(req.Token, out var username))
@@ -176,20 +176,20 @@ namespace ServerApp
             return new ResponseMessage { Success = true, User = got.user, Message = "OK" };
         }
 
-        // ✅ Đăng xuất
+        // Đăng xuất
         private static ResponseMessage DoLogout(RequestMessage req)
         {
             TokenManager.Revoke(req.Token);
             return new ResponseMessage { Success = true, Message = "Đã đăng xuất." };
         }
 
-        // ✅ Ngắt kết nối client
+        // Ngắt kết nối client
         public void Disconnect()
         {
             try
             {
                 _client.Close();
-                _ui.AddLog($"🔌 Client {_id} disconnected.");
+                _ui.AddLog($" Client {_id} disconnected.");
             }
             catch { }
         }

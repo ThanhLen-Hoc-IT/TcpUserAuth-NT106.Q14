@@ -57,10 +57,12 @@ using System.Collections.Concurrent;
 
 namespace ServerApp
 {
+    // Quản lý token đăng nhập cho người dùng
     public static class TokenManager
     {
         private static readonly ConcurrentDictionary<string, string> Tokens = new();
 
+        // Cấp phát token mới cho username
         public static string Issue(string username)
         {
             var token = Guid.NewGuid().ToString();
@@ -68,11 +70,13 @@ namespace ServerApp
             return token;
         }
 
+        // Kiểm tra token có hợp lệ không
         public static bool Validate(string token, out string username)
         {
             return Tokens.TryGetValue(token, out username);
         }
 
+        // Thu hồi (xóa) token
         public static void Revoke(string token)
         {
             Tokens.TryRemove(token, out _);
