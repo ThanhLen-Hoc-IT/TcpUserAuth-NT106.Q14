@@ -6,9 +6,9 @@ namespace ServerApp
 {
     public static class DatabaseHelper
     {
-        // ⚙️ Chuỗi kết nối SQL Server — bạn sửa lại nếu dùng instance khác
+        // ⚙️ Chuỗi kết nối SQL Server bằng tài khoản sa
         private static readonly string connectionString =
-            "Data Source=.;Initial Catalog=LoginDB;Integrated Security=True";
+            "Server=DELL-010824-01;Database=LoginDB;User Id=sa;Password=Kimngan17052006;";
 
         // ✅ Kiểm tra username đã tồn tại
         public static bool UsernameExists(string username)
@@ -38,8 +38,8 @@ namespace ServerApp
                 {
                     cmd.Parameters.AddWithValue("@u", req.Username);
                     cmd.Parameters.AddWithValue("@p", req.PasswordHash);
-                    cmd.Parameters.AddWithValue("@f", req.FullName);
-                    cmd.Parameters.AddWithValue("@e", req.Email);
+                    cmd.Parameters.AddWithValue("@f", req.FullName ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@e", req.Email ?? (object)DBNull.Value);
                     cmd.ExecuteNonQuery();
                 }
             }
