@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SharedModels;
@@ -44,7 +38,8 @@ namespace ClientApp
             if (response != null && response.Success)
             {
                 MessageBox.Show("Đăng nhập thành công!");
-                // mở form chính
+                FrmMain frmMain = new FrmMain();
+                frmMain.Show();
             }
             else
             {
@@ -52,17 +47,19 @@ namespace ClientApp
             }
 
             client.Disconnect();
-
         }
-        private void Form1_Load(object sender, EventArgs e)
+
+        private void FrmLogin_Load(object sender, EventArgs e)
         {
             SetPlaceholder(txtUsername, "Username");
-            SetPlaceholder(txtPassword, "Password");
+            SetPlaceholder(txtPassword, "Password", isPassword: true);
         }
-        private void SetPlaceholder(Label textBox, string placeholder)
+
+        private void SetPlaceholder(TextBox textBox, string placeholder, bool isPassword = false)
         {
             textBox.Text = placeholder;
             textBox.ForeColor = Color.Gray;
+            textBox.UseSystemPasswordChar = false;
 
             textBox.GotFocus += (s, e) =>
             {
@@ -70,6 +67,8 @@ namespace ClientApp
                 {
                     textBox.Text = "";
                     textBox.ForeColor = Color.Black;
+                    if (isPassword)
+                        textBox.UseSystemPasswordChar = true;
                 }
             };
 
@@ -77,9 +76,9 @@ namespace ClientApp
             {
                 if (string.IsNullOrWhiteSpace(textBox.Text))
                 {
+                    textBox.UseSystemPasswordChar = false;
                     textBox.Text = placeholder;
                     textBox.ForeColor = Color.Gray;
-
                 }
             };
         }
