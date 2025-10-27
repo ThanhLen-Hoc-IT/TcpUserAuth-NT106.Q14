@@ -19,22 +19,9 @@ namespace ServerApp
             server = new Server(this);
         }
 
-        private void FrmServerMain_Load(object sender, EventArgs e)
-        {
-            lblStatus.Text = "Server stopped";
-        }
+       
 
-        private void btnStart_Click(object sender, EventArgs e)
-        {
-            server.Start();
-            lblStatus.Text = "Server running...";
-        }
-
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            server.Stop();
-            lblStatus.Text = "Server stopped";
-        }
+        
 
 
         public void AddLog(string msg)
@@ -66,14 +53,16 @@ namespace ServerApp
             }
         }
 
-        private void txtLog_TextChanged(object sender, EventArgs e)
+        private void btnStart_Click_1(object sender, EventArgs e)
         {
-
+            server.Start();
+            lblStatus.Text = "Server running...";
         }
 
-        private void FrmServerMain_Load(object sender, EventArgs e)
+        private void btnStop_Click_1(object sender, EventArgs e)
         {
-
+            server.Stop();
+            lblStatus.Text = "Server stopped";
         }
     }
 }

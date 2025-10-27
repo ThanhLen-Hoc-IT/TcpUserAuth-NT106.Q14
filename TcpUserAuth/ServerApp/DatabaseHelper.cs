@@ -1,57 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharedModels;
 
 namespace ServerApp
 {
-    internal class DatabaseHelper
+    public static class DatabaseHelper
     {
-        private static readonly string userFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "users.txt");
+        // ⚙️ Chuỗi kết nối SQL Server — bạn sửa lại nếu dùng instance khác
+        private static readonly string connectionString =
+            "Data Source=.;Initial Catalog=LoginDB;Integrated Security=True";
 
-        // Kiểm tra username đã tồn tại chưa
+        // ✅ Kiểm tra username đã tồn tại
         public static bool UsernameExists(string username)
         {
-            if (!File.Exists(userFile)) return false;
-            return File.ReadAllLines(userFile)
-                       .Select(line => line.Split('|')[0])
-                       .Any(u => u.Equals(username, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Thêm user mới vào file
-        public static void InsertUser(User user)
-        {
-            using (StreamWriter sw = File.AppendText(userFile))
+            using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                sw.WriteLine($"{user.Username}|{user.PasswordHash}|{user.FullName}|{user.Email}");
-            }
-        }
-
-        // Lấy thông tin user theo username
-        public static User GetUserByUsername(string username)
-        {
-            if (!File.Exists(userFile)) return null;
-
-            foreach (var line in File.ReadAllLines(userFile))
-            {
-                if (string.IsNullOrWhiteSpace(line)) continue;
-                string[] parts = line.Split('|');
-                if (parts.Length >= 4 && parts[0].Equals(username, StringComparison.OrdinalIgnoreCase))
+                conn.Open();
+                string sql = "SELECT COUNT(*) FROM Users WHERE LOWER(Username) = LOWER(@u)";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
-                    return new User
-                    {
-                        Username = parts[0],
-                        PasswordHash = parts[1],
-                        FullName = parts[2],
-                        Email = parts[3]
-                    };
+                    cmd.Parameters.AddWithValue("@u", username);
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
                 }
             }
-            return null;
+        }
+
+        // ✅ Thêm user mới vào bảng
+        public static void InsertUser(RequestMessage req)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO Users (Username, PasswordHash, FullName, Email)
+                               VALUES (@u, @p, @f, @e)";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@u", req.Username);
+                    cmd.Parameters.AddWithValue("@p", req.PasswordHash);
+                    cmd.Parameters.AddWithValue("@f", req.FullName);
+                    cmd.Parameters.AddWithValue("@e", req.Email);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // ✅ Lấy user theo username
+        public static (bool ok, string hash, User user) GetUserByUsername(string username)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string sql = @"SELECT Id, Username, PasswordHash, FullName, Email 
+                               FROM Users 
+                               WHERE LOWER(Username) = LOWER(@u)";
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@u", username);
+                    using (SqlDataReader rd = cmd.ExecuteReader())
+                    {
+                        if (rd.Read())
+                        {
+                            var user = new User
+                            {
+                                Id = rd.GetInt32(0),
+                                Username = rd.GetString(1),
+                                PasswordHash = rd.GetString(2),
+                                FullName = rd.IsDBNull(3) ? "" : rd.GetString(3),
+                                Email = rd.IsDBNull(4) ? "" : rd.GetString(4)
+                            };
+                            return (true, user.PasswordHash, user);
+                        }
+                    }
+                }
+            }
+            return (false, null, null);
         }
     }
 }

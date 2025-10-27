@@ -4,52 +4,97 @@ using SharedModels;
 
 namespace ServerApp
 {
-    internal class TokenManager
+    /// <summary>
+    /// Quản lý token đăng nhập (issue, validate, revoke).
+    /// Dạng đơn giản, lưu trong bộ nhớ (chưa dùng DB hay Redis).
+    /// </summary>
+    public static class TokenManager
     {
-        private static ConcurrentDictionary<string, TokenInfo> Tokens
-            = new ConcurrentDictionary<string, TokenInfo>();
+        // Key: token string, Value: thông tin user + thời hạn
+        private static readonly ConcurrentDictionary<string, TokenInfo> _tokens =
+    new ConcurrentDictionary<string, TokenInfo>();
 
-        public static string CreateToken(int userId, int ttlMinutes = 60)
+
+        // Thời gian sống của token (ví dụ: 30 phút)
+        private static readonly TimeSpan TokenLifetime = TimeSpan.FromMinutes(30);
+
+        /// <summary>
+        /// Tạo token mới cho user.
+        /// </summary>
+        public static string Issue(string username)
         {
-            string token = Guid.NewGuid().ToString("N"); // random 32 ký tự
-            Tokens[token] = new TokenInfo
+            // Tạo token ngẫu nhiên dạng GUID
+            var token = Guid.NewGuid().ToString("N");
+
+            // Lưu token vào bộ nhớ
+            var info = new TokenInfo
             {
-                Token = token,
-                UserId = userId,
-                ExpiredAt = DateTime.Now.AddMinutes(ttlMinutes)
+                Username = username,
+                Expiration = DateTime.UtcNow.Add(TokenLifetime)
             };
+
+            _tokens[token] = info;
+
+            Logger.Info($"✅ Token issued for user {username}");
             return token;
         }
 
-        public static bool ValidateToken(string token)
+        /// <summary>
+        /// Kiểm tra token có hợp lệ hay không.
+        /// </summary>
+        public static bool Validate(string token, out string username)
         {
-            if (Tokens.TryGetValue(token, out TokenInfo info))
+            username = null;
+            if (string.IsNullOrWhiteSpace(token))
+                return false;
+
+            if (_tokens.TryGetValue(token, out var info))
             {
-                if (info.ExpiredAt > DateTime.Now)
-                    return true;
-                else
-                    Tokens.TryRemove(token, out _);
+                // Hết hạn?
+                if (DateTime.UtcNow > info.Expiration)
+                {
+                    _tokens.TryRemove(token, out _);
+                    Logger.Info($"⚠️ Token expired for user {info.Username}");
+                    return false;
+                }
+
+                username = info.Username;
+                return true;
             }
+
             return false;
         }
 
-        public static void RevokeToken(string token)
+        /// <summary>
+        /// Thu hồi (revoke) token khi user logout.
+        /// </summary>
+        public static void Revoke(string token)
         {
-            Tokens.TryRemove(token, out _);
-        }
+            if (string.IsNullOrWhiteSpace(token)) return;
 
-        public static void CleanupExpiredTokens()
-        {
-            foreach (var kv in Tokens)
+            if (_tokens.TryRemove(token, out var info))
             {
-                if (kv.Value.ExpiredAt <= DateTime.Now)
-                    Tokens.TryRemove(kv.Key, out _);
+                Logger.Info($"🚪 Token revoked for user {info.Username}");
             }
         }
-        public static string GenerateToken(int userId, int ttlMinutes = 60)
+
+        /// <summary>
+        /// Dọn dẹp token hết hạn (tùy chọn, có thể chạy định kỳ).
+        /// </summary>
+        public static void CleanupExpired()
         {
-            return CreateToken(userId, ttlMinutes);
+            foreach (var kv in _tokens)
+            {
+                if (DateTime.UtcNow > kv.Value.Expiration)
+                    _tokens.TryRemove(kv.Key, out _);
+            }
         }
 
+        // Struct chứa thông tin token
+        private class TokenInfo
+        {
+            public string Username { get; set; }
+            public DateTime Expiration { get; set; }
+        }
     }
 }

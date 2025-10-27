@@ -6,19 +6,22 @@ using System.Threading.Tasks;
 
 namespace SharedModels
 {
+    /// <summary>
+    /// Gói tin mà Server trả về cho Client.
+    /// </summary>
     public class ResponseMessage
     {
-        // Trạng thái phản hồi
+        // Kết quả xử lý (true = thành công, false = thất bại)
         public bool Success { get; set; }
 
-        // Thông điệp hiển thị cho người dùng hoặc log
-        public string Message { get; set; } = string.Empty;
+        // Thông báo cho người dùng hoặc client
+        public string Message { get; set; }
 
-        // Token trả về sau khi đăng nhập (nếu có)
+        // Token trả về khi login thành công
         public string Token { get; set; }
 
-        // Dữ liệu người dùng hoặc thông tin khác
-        public object User { get; set; }
+        // Thông tin user (nếu cần)
+        public User User { get; set; }
 
         // Dữ liệu bổ sung
         public object Data { get; set; }
