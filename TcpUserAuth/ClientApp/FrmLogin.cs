@@ -13,40 +13,74 @@ namespace ClientApp
             InitializeComponent();
         }
 
+        // ✅ Bắt sự kiện nhấn nút Login (đã hỗ trợ await)
         private async void btnLogin_Click(object sender, EventArgs e)
         {
-            string username = txtUsername.Text;
-            string password = txtPassword.Text;
+            string username = txtUsername.Text.Trim();
+            string password = txtPassword.Text.Trim();
 
-            var client = new TcpClientHelper();
-            bool connected = await client.ConnectAsync();
-
-            if (!connected)
+            // Kiểm tra nhập trống
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) ||
+                username == "Username" || password == "Password")
             {
-                MessageBox.Show("Không kết nối được server!");
+                MessageBox.Show("Vui lòng nhập đầy đủ Username và Password!", "Thiếu thông tin",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var request = new RequestMessage
-            {
-                Action = "Login",
-                Data = new { Username = username, Password = password }
-            };
+            btnLogin.Enabled = false; // Tạm khóa nút tránh nhấn liên tục
 
-            var response = await client.SendRequestAsync(request);
-
-            if (response != null && response.Success)
+            try
             {
-                MessageBox.Show("Đăng nhập thành công!");
-                FrmMain frmMain = new FrmMain();
-                frmMain.Show();
+                var client = new TcpClientHelper();
+                bool connected = await client.ConnectAsync();
+
+                if (!connected)
+                {
+                    MessageBox.Show("Không thể kết nối đến server.", "Lỗi mạng",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var request = new RequestMessage
+                {
+                    Action = "Login",
+                    Data = new { Username = username, Password = password }
+                };
+
+                var response = await client.SendRequestAsync(request);
+
+                if (response != null && response.Success)
+                {
+                    // ✅ Lưu thông tin session
+                    SessionManager.Username = username;
+                    SessionManager.Token = response.Token;
+
+                    MessageBox.Show("Đăng nhập thành công!", "Thành công",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Mở form chính và ẩn form login
+                    FrmMain frmMain = new FrmMain();
+                    frmMain.Show();
+                    this.Hide();
+                }
+                else
+                {
+                    MessageBox.Show(response?.Message ?? "Đăng nhập thất bại!", "Lỗi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                client.Disconnect();
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show(response?.Message ?? "Đăng nhập thất bại!");
+                MessageBox.Show($"Lỗi: {ex.Message}", "Lỗi đăng nhập",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            client.Disconnect();
+            finally
+            {
+                btnLogin.Enabled = true; // Mở lại nút
+            }
         }
 
         private void FrmLogin_Load(object sender, EventArgs e)
@@ -55,6 +89,7 @@ namespace ClientApp
             SetPlaceholder(txtPassword, "Password", isPassword: true);
         }
 
+        // ✅ Hàm tạo placeholder cho textbox
         private void SetPlaceholder(TextBox textBox, string placeholder, bool isPassword = false)
         {
             textBox.Text = placeholder;
