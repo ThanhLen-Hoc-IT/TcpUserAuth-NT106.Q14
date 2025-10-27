@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-=======
-﻿using SharedModels;
 using System;
->>>>>>> 823bd52597aa9b2f0146871a60a6b9c7a4edf517
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,7 +13,6 @@ namespace ClientApp
 
         public bool IsConnected => _client?.Connected ?? false;
 
-<<<<<<< HEAD
         /// <summary>
         /// Kết nối tới server (mặc định 127.0.0.1:8888)
         /// </summary>
@@ -28,9 +20,12 @@ namespace ClientApp
         {
             try
             {
+                if (IsConnected) return true;
+
                 _client = new TcpClient();
                 await _client.ConnectAsync(host, port);
                 _stream = _client.GetStream();
+
                 return true;
             }
             catch (Exception ex)
@@ -41,36 +36,34 @@ namespace ClientApp
         }
 
         /// <summary>
-        /// Gửi RequestMessage đến server và chờ nhận ResponseMessage.
+        /// Gửi RequestMessage và chờ nhận ResponseMessage (dạng JSON, kết thúc bằng '\n')
         /// </summary>
         public async Task<ResponseMessage> SendRequestAsync(RequestMessage request)
         {
-            if (_client == null || !_client.Connected)
-            {
+            if (!IsConnected)
                 throw new InvalidOperationException("Client chưa kết nối server!");
-            }
 
             try
             {
-                // Gửi request dạng JSON
-                var json = Utilities.ToJson(request) + "\n";
-                var data = Encoding.UTF8.GetBytes(json);
+                // Gửi request
+                string json = Utilities.ToJson(request) + "\n";
+                byte[] data = Encoding.UTF8.GetBytes(json);
                 await _stream.WriteAsync(data, 0, data.Length);
 
                 // Nhận phản hồi
-                var buffer = new byte[4096];
-                var sb = new StringBuilder();
+                byte[] buffer = new byte[4096];
+                StringBuilder sb = new StringBuilder();
 
                 while (true)
                 {
-                    int n = await _stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (n == 0) break;
+                    int bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length);
+                    if (bytesRead == 0) break; // Server đóng kết nối
 
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, n));
+                    sb.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
 
                     if (sb.ToString().Contains("\n"))
                     {
-                        var line = sb.ToString().Split('\n')[0];
+                        string line = sb.ToString().Split('\n')[0];
                         var resp = Utilities.FromJson<ResponseMessage>(line);
                         return resp;
                     }
@@ -86,19 +79,8 @@ namespace ClientApp
         }
 
         /// <summary>
-        /// Đóng kết nối TCP
+        /// Gửi gói tin mà không cần chờ phản hồi
         /// </summary>
-        public void Disconnect()
-=======
-        public async Task ConnectAsync(string ip, int port)
-        {
-            if (IsConnected) return;
-
-            _client = new TcpClient();
-            await _client.ConnectAsync(ip, port);
-            _stream = _client.GetStream();
-        }
-
         public async Task SendPacketAsync(RequestMessage req)
         {
             if (!IsConnected)
@@ -109,6 +91,9 @@ namespace ClientApp
             await _stream.WriteAsync(data, 0, data.Length);
         }
 
+        /// <summary>
+        /// Nhận phản hồi (nếu server chủ động gửi về)
+        /// </summary>
         public async Task<ResponseMessage> ReceivePacketAsync()
         {
             if (!IsConnected)
@@ -116,18 +101,24 @@ namespace ClientApp
 
             byte[] buffer = new byte[4096];
             int n = await _stream.ReadAsync(buffer, 0, buffer.Length);
-            string json = Encoding.UTF8.GetString(buffer, 0, n);
+            if (n == 0) return null;
 
-            // Một số server có thể gửi nhiều gói => chỉ lấy phần đầu tiên trước dấu xuống dòng
+            string json = Encoding.UTF8.GetString(buffer, 0, n);
             if (json.Contains("\n"))
                 json = json.Substring(0, json.IndexOf('\n'));
 
-            var resp = Utilities.FromJson<ResponseMessage>(json);
-            return resp;
+            return Utilities.FromJson<ResponseMessage>(json);
+        }
+
+        /// <summary>
+        /// Đóng kết nối TCP
+        /// </summary>
+        public void Disconnect()
+        {
+            Dispose();
         }
 
         public void Dispose()
->>>>>>> 823bd52597aa9b2f0146871a60a6b9c7a4edf517
         {
             try
             {
@@ -136,13 +127,7 @@ namespace ClientApp
             }
             catch { }
         }
-<<<<<<< HEAD
-=======
 
-        public void Close()
-        {
-            Dispose();
-        }
->>>>>>> 823bd52597aa9b2f0146871a60a6b9c7a4edf517
+        public void Close() => Dispose();
     }
 }
